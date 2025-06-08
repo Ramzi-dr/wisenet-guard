@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config();
 import { logger } from "./logger.js";
 import sendEmail from "./emailManager.js";
 import { asanaSection, asanaTaskName } from "./configs/asanaInstances.js";
@@ -115,6 +115,7 @@ class AsanaManager {
 }
 
 async function handleAsana(notes) {
+  
   const instance = new AsanaManager(notes);
   await instance.run();
 }

@@ -1,0 +1,40 @@
+services:
+  wisenet-db:
+    image: mongo:7
+    container_name: wisenet-guard-db
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27018:27017"
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_DATABASE: wisenet
+    volumes:
+      - wisenet-guard-db-data:/data/db
+    networks:
+      - wisenet-guard-net
+
+  wisenet-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wisenet-guard-app
+    restart: unless-stopped
+    depends_on:
+      - wisenet-db
+    env_file:
+      - .env
+    volumes:
+      - ./configs:/usr/src/app/configs:ro
+
+    networks:
+      - wisenet-guard-net
+    command: ["node", "index.js"]
+
+volumes:
+  wisenet-guard-db-data:
+
+networks:
+  wisenet-guard-net:
+    name: wisenet-guard-net
+    driver: bridge

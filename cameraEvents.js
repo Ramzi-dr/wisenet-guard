@@ -6,19 +6,16 @@ const cameraStatusMap = new Map();
 const cameraEventTimestamps = new Map();
 
 const cameraEvents = async (message) => {
-  const { command, params, serverIp, clientId } = message;
-
-  console.log("command", command);
+  const { command, params, serverId, clientId, serverName } = message;
 
   if (!params?.id || !params?.status) return;
 
   const cameraId = params.id;
   const status = params.status;
-  const key = `${serverIp}_${cameraId}`;
+  const key = `${serverId}_${cameraId}`;
   const statusKey = `${key}_${status}`;
   const now = Date.now();
 
-  // Deduplicate same status within 5s
   if (cameraEventTimestamps.get(statusKey) > now - 5000) return;
   cameraEventTimestamps.set(statusKey, now);
 
@@ -27,7 +24,7 @@ const cameraEvents = async (message) => {
 
   switch (status) {
     case "Offline": {
-      const messageText = `[${clientId}] Camera ${cameraId} is Offline on ${serverIp}`;
+      const messageText = `[${serverName}] [${clientId}] Camera ${cameraId} is Offline on ${serverId}`;
       logger.warn(messageText);
       handleAsana(messageText);
       sendEmail(messageText);
@@ -36,13 +33,13 @@ const cameraEvents = async (message) => {
 
     case "Online": {
       if (previousStatus === "Offline") {
-        const messageText = `[${clientId}] Camera ${cameraId} is now Online (was Offline) on ${serverIp}`;
+        const messageText = `[${serverName}] [${clientId}] Camera ${cameraId} is now Online (was Offline) on ${serverId}`;
         logger.info(messageText);
         handleAsana(messageText);
         sendEmail(messageText);
       } else {
         logger.info(
-          `[${clientId}] Camera ${cameraId} is Online on ${serverIp}`,
+          `[${serverName}] [${clientId}] Camera ${cameraId} is Online on ${serverId}`,
         );
       }
       break;
@@ -50,14 +47,14 @@ const cameraEvents = async (message) => {
 
     case "Recording": {
       logger.info(
-        `[${clientId}] Camera ${cameraId} is Recording on ${serverIp}`,
+        `[${serverName}] [${clientId}] Camera ${cameraId} is Recording on ${serverId}`,
       );
       break;
     }
 
     default: {
       logger.info(
-        `[${clientId}] Camera ${cameraId} has unknown status "${status}" on ${serverIp}`,
+        `[${serverName}] [${clientId}] Camera ${cameraId} has unknown status "${status}" on ${serverId}`,
       );
     }
   }

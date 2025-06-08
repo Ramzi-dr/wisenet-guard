@@ -3,6 +3,8 @@ import { logger } from "./logger.js"; // Import logger
 
 // Create a reusable email sending function
 const sendEmail = async (text) => {
+  
+
   const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
     port: 587,

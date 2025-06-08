@@ -3,12 +3,12 @@ import https from "https";
 import { logger } from "./logger.js";
 
 class TokenManager {
-  constructor() {
-    this.serverIp = process.env.WISENET_SERVER_IP;
-    this.serverPort = process.env.WISENET_SERVER_PORT;
-    this.apiUrl = `https://${this.serverIp}:${this.serverPort}/${process.env.SESSION_ENDPOINT}`;
-    this.username = process.env.WISENET_SERVER_USERNAME;
-    this.password = process.env.WISENET_SERVER_PASSWORD;
+  constructor({ serverId, username, password, serverName }) {
+    this.serverId = serverId;
+    this.apiUrl = `https://${this.serverId}.relay.vmsproxy.com/${process.env.SESSION_ENDPOINT}`;
+    this.username = username;
+    this.password = password;
+    this.serverName = serverName;
     this.token = null;
     this.expiresIn = null;
     this.tokenExpirationTime = null;
@@ -30,7 +30,13 @@ class TokenManager {
           username: this.username,
           password: this.password,
         },
-        { httpsAgent },
+        {
+          httpsAgent,
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        },
       );
 
       this.token = response.data.token;
@@ -38,21 +44,31 @@ class TokenManager {
       this.tokenExpirationTime = Date.now() + this.expiresIn * 1000;
 
       logger.info(
-        `Token valid until: ${new Date(
+        `[${this.serverName}] Token valid until: ${new Date(
           this.tokenExpirationTime,
         ).toISOString()}`,
       );
 
       return this.token;
     } catch (error) {
-      console.error(
-        "Error refreshing token:",
-        error.response ? error.response.data : error.message,
-      );
+      const msg = `[${this.serverName}] Error refreshing token: ${
+        error.response?.data || error.message
+      }`;
+      logger.error(msg);
       this.token = null;
       throw new Error("Unable to refresh token");
     }
   };
 }
 
-export default TokenManager;
+async function handleToken(serverId, username, password, serverName) {
+  const instance = new TokenManager({
+    serverId,
+    username,
+    password,
+    serverName,
+  });
+  return await instance.getToken();
+}
+
+export default handleToken;

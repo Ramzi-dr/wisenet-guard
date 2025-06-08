@@ -3,7 +3,12 @@ import cameraEvents from "./cameraEvents.js";
 import sendEmail from "./emailManager.js";
 import { logger } from "./logger.js";
 
-const handleIncomingMessage = async (serverIp, clientId, message) => {
+const handleIncomingMessage = async (
+  serverId,
+  clientId,
+  serverName,
+  message,
+) => {
   if (!message) return;
 
   try {
@@ -15,7 +20,8 @@ const handleIncomingMessage = async (serverIp, clientId, message) => {
       if (tran.params) {
         cameraEvents({
           clientId,
-          serverIp,
+          serverId,
+          serverName,
           command: tran.command,
           params: tran.params,
         }).catch(console.error);
@@ -25,13 +31,13 @@ const handleIncomingMessage = async (serverIp, clientId, message) => {
 
     if (ignoredCommands.includes(tran.command)) return;
 
-    console.log("Command not in list:", tran.command);
-    if (tran.params) {
-      console.log("Params:", tran.params);
-    }
+    logger.info(
+      `[${serverName}] [${clientId}] Command not in list:`,
+      tran.command,
+    );
   } catch (error) {
-    const msg = `Error processing incoming message at server ${serverIp}: ${error.message}`;
-    console.error(msg);
+    const msg = `[${serverName}] [${clientId}] Error processing incoming message at ${serverId}: ${error.message}`;
+
     logger.error(msg);
     sendEmail(msg);
   }
