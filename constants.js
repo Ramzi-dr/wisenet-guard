@@ -3,8 +3,8 @@
 //https://10.242.144.238:7001
 const serverIp = "10.242.144.238";
 const serverPort = "7001";
-export const WISENET_USERNAME = "admin";
-export const WISENET_PASSWORD = "Tech@Home15!";
+export const WISENET_USERNAME = "USERNAME";
+export const WISENET_PASSWORD = "PAASWORD";
 export const API_SERVER_URL = `https://${serverIp}:${serverPort}/`;
 export const WEBSOCKET_URL = `wss://${serverIp}:${serverPort}/ec2/transactionBus/websocket`;
 export const SESSION_ENDPOINT = "rest/v3/login/sessions";
